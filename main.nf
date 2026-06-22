@@ -145,7 +145,7 @@ process AMRAnnotate {
 
 workflow {
     accessions_path = params.accessions ?: "${projectDir}/assets/accessions.tsv"
-    accessions_ch = Channel.fromPath(params.accessions, checkIfExists: true)
+    accessions_ch = Channel.fromPath(accessions_path, checkIfExists: true)
 
     importAccessions(accessions_ch)
 
