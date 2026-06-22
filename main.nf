@@ -72,6 +72,7 @@ process assembleMegahit {
         --p-num-cpu-threads ${task.cpus} \
         --o-contigs contigs.qza \
         --verbose
+    """
 }
 
 process predictGenesProdigal {
