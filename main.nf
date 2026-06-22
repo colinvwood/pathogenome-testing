@@ -1,6 +1,6 @@
 #!/usr/bin/env nextflow
 
-params.accessions = "assets/accessions.tsv"
+params.accessions = null
 params.outdir = "results"
 
 params.fondue_threads = 8
@@ -144,6 +144,7 @@ process AMRAnnotate {
 
 
 workflow {
+    accessions_path = params.accessions ?: "${projectDir}/assets/accessions.tsv"
     accessions_ch = Channel.fromPath(params.accessions, checkIfExists: true)
 
     importAccessions(accessions_ch)
