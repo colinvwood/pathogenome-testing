@@ -121,6 +121,7 @@ process downloadAMRDB {
         git checkout main
         python -m pip install -e .
         qiime dev refresh-cache
+        cd -
 
         qiime amrfinderplus fetch-amrfinderplus-db \
           --o-amrfinderplus-db amrfinderplus-db.qza \
