@@ -8,6 +8,8 @@ params.megahit_threads = 12
 
 
 process importAccessions {
+    label 'moshpit'
+
     publishDir "${params.outdir}/accessions", mode: "copy"
 
     input:
@@ -26,6 +28,8 @@ process importAccessions {
 }
 
 process fondueDownload {
+    label 'moshpit'
+
     cpus params.fondue_threads as int
 
     publishDir "${params.outdir}/fondue", mode: 'copy'
@@ -55,6 +59,8 @@ process fondueDownload {
 }
 
 process assembleMegahit {
+    label 'moshpit'
+
     cpus params.megahit_threads as int
 
     publishDir "${params.outdir}/assembly", mode: "copy"
@@ -76,6 +82,8 @@ process assembleMegahit {
 }
 
 process predictGenesProdigal {
+    label 'moshpit'
+
     publishDir "${params.outdir}/gene_prediction", mode: "copy"
 
     input:
@@ -99,6 +107,8 @@ process predictGenesProdigal {
 }
 
 process downloadAMRDB {
+    label 'pathogenome'
+
     publishDir "${params.outdir}/amrfinderplus_db", mode: "copy"
 
     output:
@@ -113,6 +123,8 @@ process downloadAMRDB {
 }
 
 process AMRAnnotate {
+    label 'pathogenome'
+
     publishDir "${params.outdir}/05_amrfinderplus", mode: "copy"
 
     input:
