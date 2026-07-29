@@ -58,6 +58,44 @@ process fondueDownload {
 
 }
 
+process exportFondueDiagnostics {
+    label 'moshpit'
+
+    publishDir "${params.outdir}/diagnostics/fondue",
+        mode: "copy",
+        saveAs: { filename ->
+            filename == "paired_reads.qza" ? null : filename
+        }
+
+    input:
+        path metadata
+        path failed_runs
+        path paired_reads
+
+    output:
+        path "metadata", emit: metadata
+        path "failed_runs", emit: failed_runs
+        path "paired_reads_manifest.csv", emit: paired_reads_manifest
+        path "paired_reads_archive_listing.txt", emit: paired_reads_archive_listing
+        path paired_reads, emit: paired_reads
+
+    script:
+        """
+        qiime tools export \
+            --input-path "${metadata}" \
+            --output-path metadata
+
+        qiime tools export \
+            --input-path "${failed_runs}" \
+            --output-path failed_runs
+
+        unzip -p "${paired_reads}" '*/data/MANIFEST' \
+            > paired_reads_manifest.csv
+        unzip -l "${paired_reads}" \
+            > paired_reads_archive_listing.txt
+        """
+}
+
 process assembleMegahit {
     label 'moshpit'
 
@@ -79,6 +117,36 @@ process assembleMegahit {
         --o-contigs contigs.qza \
         --verbose
     """
+}
+
+process exportAssemblyDiagnostics {
+    label 'moshpit'
+
+    publishDir "${params.outdir}/diagnostics/assembly",
+        mode: "copy",
+        saveAs: { filename ->
+            filename == "contigs.qza" ? null : filename
+        }
+
+    input:
+        path contigs
+
+    output:
+        path contigs, emit: contig_artifact
+        path "contigs", emit: exported_contigs
+        path "contig_stats.tsv", emit: contig_stats
+
+    script:
+        """
+        qiime tools export \
+            --input-path "${contigs}" \
+            --output-path contigs
+
+        printf 'file\\tcontigs\\tbases\\n' > contig_stats.tsv
+        find contigs -type f -name '*.fa' -exec \
+            awk 'BEGIN { n=0; bp=0 } /^>/ { n++; next } { bp += length(\$0) } END { printf "%s\\t%d\\t%d\\n", FILENAME, n, bp }' {} \\; \
+            >> contig_stats.tsv
+        """
 }
 
 process predictGenesProdigal {
@@ -164,23 +232,31 @@ process AMRAnnotate {
 
 workflow {
     accessions_path = params.accessions ?: "${projectDir}/assets/accessions.tsv"
-    accessions_ch = Channel.fromPath(accessions_path, checkIfExists: true)
+    accessions_ch = channel.fromPath(accessions_path, checkIfExists: true)
 
     importAccessions(accessions_ch)
 
     fondueDownload(importAccessions.out.accession_ids)
 
-    reads_ch = fondueDownload.out.paired_reads
+    exportFondueDiagnostics(
+        fondueDownload.out.metadata,
+        fondueDownload.out.failed_runs,
+        fondueDownload.out.paired_reads
+    )
+
+    reads_ch = exportFondueDiagnostics.out.paired_reads
 
     assembleMegahit(reads_ch)
 
-    predictGenesProdigal(assembleMegahit.out.contigs)
+    exportAssemblyDiagnostics(assembleMegahit.out.contigs)
+
+    predictGenesProdigal(exportAssemblyDiagnostics.out.contig_artifact)
 
     downloadAMRDB()
 
     AMRAnnotate(
         downloadAMRDB.out.amrfinderplus_db,
-        assembleMegahit.out.contigs,
+        exportAssemblyDiagnostics.out.contig_artifact,
         predictGenesProdigal.out.proteins,
         predictGenesProdigal.out.loci
     )

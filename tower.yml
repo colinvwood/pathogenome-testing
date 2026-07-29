@@ -1,0 +1,16 @@
+reports:
+  "**/diagnostics/fondue/failed_runs/*.tsv":
+    display: "Fondue failed runs"
+    mimeType: "text/tab-separated-values"
+  "**/diagnostics/fondue/metadata/*.tsv":
+    display: "Fondue metadata"
+    mimeType: "text/tab-separated-values"
+  "**/diagnostics/fondue/paired_reads_manifest.csv":
+    display: "Paired reads manifest"
+    mimeType: "text/csv"
+  "**/diagnostics/fondue/paired_reads_archive_listing.txt":
+    display: "Paired reads archive listing"
+    mimeType: "text/plain"
+  "**/diagnostics/assembly/contig_stats.tsv":
+    display: "Assembly contig statistics"
+    mimeType: "text/tab-separated-values"
