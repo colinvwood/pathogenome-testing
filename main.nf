@@ -1,7 +1,7 @@
 #!/usr/bin/env nextflow
 
 params.accessions = null
-params.outdir = "results"
+params.outdir = null
 
 params.fondue_threads = 8
 params.megahit_threads = 12
@@ -31,6 +31,9 @@ process fondueDownload {
     label 'moshpit'
 
     cpus params.fondue_threads as int
+    // q2-fondue runs fasterq-dump in /tmp. On Google Batch, specifying a
+    // disk type mounts this dedicated scratch disk at /tmp.
+    disk 200.GB, type: 'pd-standard'
 
     publishDir "${params.outdir}/fondue", mode: 'copy'
 
@@ -45,6 +48,7 @@ process fondueDownload {
 
     script:
         """
+        # Cache revision: retry downloads with dedicated 200 GB /tmp scratch.
         qiime fondue get-all \
             --i-accession-ids ${accession_ids} \
             --p-email "REMOVED_EMAIL" \
