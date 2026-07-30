@@ -104,6 +104,10 @@ process assembleMegahit {
     label 'moshpit'
 
     cpus params.megahit_threads as int
+    // q2-assembly and MEGAHIT keep their working data under /tmp. Google
+    // local SSDs are provisioned in 375 GB units and are suited to this
+    // high-I/O assembly step.
+    disk 375.GB, type: 'local-ssd'
 
     publishDir "${params.outdir}/assembly", mode: "copy"
 
@@ -115,6 +119,7 @@ process assembleMegahit {
 
     script:
     """
+    # Cache revision: rerun assembly with dedicated 375 GB /tmp scratch.
     qiime assembly assemble-megahit \
         --i-reads "${reads}" \
         --p-num-cpu-threads ${task.cpus} \
