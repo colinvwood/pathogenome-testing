@@ -1,7 +1,6 @@
 #!/usr/bin/env nextflow
 
 params.accessions = null
-params.outdir = null
 
 params.fondue_threads = 8
 params.megahit_threads = 12
@@ -9,8 +8,6 @@ params.megahit_threads = 12
 
 process importAccessions {
     label 'moshpit'
-
-    publishDir "${params.outdir}/accessions", mode: "copy"
 
     input:
         path accessions_tsv
@@ -34,8 +31,6 @@ process fondueDownload {
     // q2-fondue runs fasterq-dump in /tmp. On Google Batch, specifying a
     // disk type mounts this dedicated scratch disk at /tmp.
     disk 200.GB, type: 'pd-standard'
-
-    publishDir "${params.outdir}/fondue", mode: 'copy'
 
     input:
         path accession_ids
@@ -62,44 +57,6 @@ process fondueDownload {
 
 }
 
-process exportFondueDiagnostics {
-    label 'moshpit'
-
-    publishDir "${params.outdir}/diagnostics/fondue",
-        mode: "copy",
-        saveAs: { filename ->
-            filename == "paired_reads.qza" ? null : filename
-        }
-
-    input:
-        path metadata
-        path failed_runs
-        path paired_reads
-
-    output:
-        path "metadata", emit: metadata
-        path "failed_runs", emit: failed_runs
-        path "paired_reads_manifest.csv", emit: paired_reads_manifest
-        path "paired_reads_archive_listing.txt", emit: paired_reads_archive_listing
-        path paired_reads, emit: paired_reads
-
-    script:
-        """
-        qiime tools export \
-            --input-path "${metadata}" \
-            --output-path metadata
-
-        qiime tools export \
-            --input-path "${failed_runs}" \
-            --output-path failed_runs
-
-        unzip -p "${paired_reads}" '*/data/MANIFEST' \
-            > paired_reads_manifest.csv
-        unzip -l "${paired_reads}" \
-            > paired_reads_archive_listing.txt
-        """
-}
-
 process assembleMegahit {
     label 'moshpit'
 
@@ -108,8 +65,6 @@ process assembleMegahit {
     // local SSDs are provisioned in 375 GB units and are suited to this
     // high-I/O assembly step.
     disk 375.GB, type: 'local-ssd'
-
-    publishDir "${params.outdir}/assembly", mode: "copy"
 
     input:
         path reads
@@ -128,40 +83,8 @@ process assembleMegahit {
     """
 }
 
-process exportAssemblyDiagnostics {
-    label 'moshpit'
-
-    publishDir "${params.outdir}/diagnostics/assembly",
-        mode: "copy",
-        saveAs: { filename ->
-            filename == "contigs.qza" ? null : filename
-        }
-
-    input:
-        path contigs
-
-    output:
-        path contigs, emit: contig_artifact
-        path "contigs", emit: exported_contigs
-        path "contig_stats.tsv", emit: contig_stats
-
-    script:
-        """
-        qiime tools export \
-            --input-path "${contigs}" \
-            --output-path contigs
-
-        printf 'file\\tcontigs\\tbases\\n' > contig_stats.tsv
-        find contigs -type f -name '*.fa' -exec \
-            awk 'BEGIN { n=0; bp=0 } /^>/ { n++; next } { bp += length(\$0) } END { printf "%s\\t%d\\t%d\\n", FILENAME, n, bp }' {} \\; \
-            >> contig_stats.tsv
-        """
-}
-
 process predictGenesProdigal {
     label 'moshpit'
-
-    publishDir "${params.outdir}/gene_prediction", mode: "copy"
 
     input:
         path contigs
@@ -186,8 +109,6 @@ process predictGenesProdigal {
 process downloadAMRDB {
     label 'pathogenome'
 
-    publishDir "${params.outdir}/amrfinderplus_db", mode: "copy"
-
     output:
         path "amrfinderplus-db.qza", emit: amrfinderplus_db
 
@@ -208,8 +129,6 @@ process downloadAMRDB {
 
 process AMRAnnotate {
     label 'pathogenome'
-
-    publishDir "${params.outdir}/05_amrfinderplus", mode: "copy"
 
     input:
         path amrfinderplus_db
@@ -247,25 +166,17 @@ workflow {
 
     fondueDownload(importAccessions.out.accession_ids)
 
-    exportFondueDiagnostics(
-        fondueDownload.out.metadata,
-        fondueDownload.out.failed_runs,
-        fondueDownload.out.paired_reads
-    )
-
-    reads_ch = exportFondueDiagnostics.out.paired_reads
+    reads_ch = fondueDownload.out.paired_reads
 
     assembleMegahit(reads_ch)
 
-    exportAssemblyDiagnostics(assembleMegahit.out.contigs)
-
-    predictGenesProdigal(exportAssemblyDiagnostics.out.contig_artifact)
+    predictGenesProdigal(assembleMegahit.out.contigs)
 
     downloadAMRDB()
 
     AMRAnnotate(
         downloadAMRDB.out.amrfinderplus_db,
-        exportAssemblyDiagnostics.out.contig_artifact,
+        assembleMegahit.out.contigs,
         predictGenesProdigal.out.proteins,
         predictGenesProdigal.out.loci
     )
