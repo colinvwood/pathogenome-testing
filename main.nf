@@ -87,6 +87,10 @@ process assembleMegahit {
 process predictGenesProdigal {
     label 'moshpit'
 
+    // q2-annotate unpacks the contigs artifact and writes multiple large
+    // outputs under /tmp. Google local SSDs are provisioned in 375 GB units.
+    disk 375.GB, type: 'local-ssd'
+
     input:
         path contigs
 
