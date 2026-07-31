@@ -1,6 +1,7 @@
 #!/usr/bin/env nextflow
 
 params.accessions = null
+params.contigs = null
 
 params.fondue_threads = 8
 params.megahit_threads = 12
@@ -159,24 +160,30 @@ process AMRAnnotate {
 
 
 workflow {
-    accessions_path = params.accessions ?: "${projectDir}/assets/accessions.tsv"
-    accessions_ch = channel.fromPath(accessions_path, checkIfExists: true)
+    if (params.contigs) {
+        contigs_ch = channel.fromPath(params.contigs, checkIfExists: true)
+    } else {
+        accessions_path = params.accessions ?: "${projectDir}/assets/accessions.tsv"
+        accessions_ch = channel.fromPath(accessions_path, checkIfExists: true)
 
-    importAccessions(accessions_ch)
+        importAccessions(accessions_ch)
 
-    fondueDownload(importAccessions.out.accession_ids)
+        fondueDownload(importAccessions.out.accession_ids)
 
-    reads_ch = fondueDownload.out.paired_reads
+        reads_ch = fondueDownload.out.paired_reads
 
-    assembleMegahit(reads_ch)
+        assembleMegahit(reads_ch)
 
-    predictGenesProdigal(assembleMegahit.out.contigs)
+        contigs_ch = assembleMegahit.out.contigs
+    }
+
+    predictGenesProdigal(contigs_ch)
 
     downloadAMRDB()
 
     AMRAnnotate(
         downloadAMRDB.out.amrfinderplus_db,
-        assembleMegahit.out.contigs,
+        contigs_ch,
         predictGenesProdigal.out.proteins,
         predictGenesProdigal.out.loci
     )
