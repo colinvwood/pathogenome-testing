@@ -119,13 +119,6 @@ process downloadAMRDB {
 
     script:
         """
-        git clone https://github.com/bokulich-lab/q2-amrfinderplus q2-amrfinderplus
-        cd q2-amrfinderplus
-        git checkout main
-        python -m pip install -e .
-        qiime dev refresh-cache
-        cd -
-
         qiime amrfinderplus fetch-amrfinderplus-db \
           --o-amrfinderplus-db amrfinderplus-db.qza \
           --verbose
