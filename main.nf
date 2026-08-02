@@ -147,6 +147,7 @@ process AMRAnnotate {
           --i-sequences "${contigs}" \
           --i-proteins "${proteins}" \
           --i-loci "${loci}" \
+          --p-threads ${task.cpus} \
           --o-amr-annotations amrfinderplus_annotations.qza \
           --o-amr-all-mutations amrfinderplus_all_mutations.qza \
           --o-amr-genes amrfinderplus_genes.qza \
