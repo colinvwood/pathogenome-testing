@@ -1,7 +1,6 @@
 #!/usr/bin/env nextflow
 
 params.accessions = null
-params.contigs = null
 
 params.fondue_threads = 8
 params.megahit_threads = 12
@@ -44,7 +43,6 @@ process fondueDownload {
 
     script:
         """
-        # Cache revision: retry downloads with dedicated 200 GB /tmp scratch.
         qiime fondue get-all \
             --i-accession-ids ${accession_ids} \
             --p-email "REMOVED_EMAIL" \
@@ -75,7 +73,6 @@ process assembleMegahit {
 
     script:
     """
-    # Cache revision: rerun assembly with dedicated 375 GB /tmp scratch.
     qiime assembly assemble-megahit \
         --i-reads "${reads}" \
         --p-num-cpu-threads ${task.cpus} \
@@ -158,30 +155,24 @@ process AMRAnnotate {
 
 
 workflow {
-    if (params.contigs) {
-        contigs_ch = channel.fromPath(params.contigs, checkIfExists: true)
-    } else {
-        accessions_path = params.accessions ?: "${projectDir}/assets/accessions.tsv"
-        accessions_ch = channel.fromPath(accessions_path, checkIfExists: true)
+    accessions_path = params.accessions ?: "${projectDir}/assets/accessions.tsv"
+    accessions_ch = channel.fromPath(accessions_path, checkIfExists: true)
 
-        importAccessions(accessions_ch)
+    importAccessions(accessions_ch)
 
-        fondueDownload(importAccessions.out.accession_ids)
+    fondueDownload(importAccessions.out.accession_ids)
 
-        reads_ch = fondueDownload.out.paired_reads
+    reads_ch = fondueDownload.out.paired_reads
 
-        assembleMegahit(reads_ch)
+    assembleMegahit(reads_ch)
 
-        contigs_ch = assembleMegahit.out.contigs
-    }
-
-    predictGenesProdigal(contigs_ch)
+    predictGenesProdigal(assembleMegahit.out.contigs)
 
     downloadAMRDB()
 
     AMRAnnotate(
         downloadAMRDB.out.amrfinderplus_db,
-        contigs_ch,
+        assembleMegahit.out.contigs,
         predictGenesProdigal.out.proteins,
         predictGenesProdigal.out.loci
     )
