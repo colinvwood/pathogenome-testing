@@ -1,6 +1,7 @@
 #!/usr/bin/env nextflow
 
 params.accessions = null
+params.fondue_email = null
 
 params.fondue_threads = 8
 params.megahit_threads = 12
@@ -34,6 +35,7 @@ process fondueDownload {
 
     input:
         path accession_ids
+        val fondue_email
 
     output:
         path "metadata.qza", emit: metadata
@@ -45,7 +47,7 @@ process fondueDownload {
         """
         qiime fondue get-all \
             --i-accession-ids ${accession_ids} \
-            --p-email "REMOVED_EMAIL" \
+            --p-email "${fondue_email}" \
             --p-threads ${task.cpus} \
             --o-metadata metadata.qza \
             --o-single-reads single_reads.qza \
@@ -155,12 +157,16 @@ process AMRAnnotate {
 
 
 workflow {
+    if (!params.fondue_email) {
+        error "Missing required parameter: --fondue_email"
+    }
+
     accessions_path = params.accessions ?: "${projectDir}/assets/accessions.tsv"
     accessions_ch = channel.fromPath(accessions_path, checkIfExists: true)
 
     importAccessions(accessions_ch)
 
-    fondueDownload(importAccessions.out.accession_ids)
+    fondueDownload(importAccessions.out.accession_ids, params.fondue_email)
 
     reads_ch = fondueDownload.out.paired_reads
 
