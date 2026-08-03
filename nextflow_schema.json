@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema",
+  "title": "Pathogenome workflow parameters",
+  "description": "Parameters for downloading accession reads, assembling contigs, predicting genes, and annotating antimicrobial resistance.",
+  "type": "object",
+  "required": [
+    "accessions",
+    "fondue_email"
+  ],
+  "properties": {
+    "accessions": {
+      "type": "string",
+      "format": "file-path",
+      "mimetype": "text/tsv",
+      "title": "Accession IDs",
+      "description": "TSV file with a sample-id header and one NCBI or ENA run accession per row."
+    },
+    "fondue_email": {
+      "type": "string",
+      "format": "email",
+      "title": "Contact email",
+      "description": "Email address supplied to q2-fondue for accession downloads."
+    },
+    "fondue_threads": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 8,
+      "title": "Fondue threads",
+      "description": "Number of CPUs used to download accession reads."
+    },
+    "megahit_threads": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 12,
+      "title": "MEGAHIT threads",
+      "description": "Number of CPUs used for assembly."
+    }
+  }
+}

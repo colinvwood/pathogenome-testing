@@ -161,8 +161,11 @@ workflow {
         error "Missing required parameter: --fondue_email"
     }
 
-    accessions_path = params.accessions ?: "${projectDir}/assets/accessions.tsv"
-    accessions_ch = channel.fromPath(accessions_path, checkIfExists: true)
+    if (!params.accessions) {
+        error "Missing required parameter: --accessions"
+    }
+
+    accessions_ch = channel.fromPath(params.accessions, checkIfExists: true)
 
     importAccessions(accessions_ch)
 
