@@ -1,5 +1,5 @@
 {
-  "$schema": "https://json-schema.org/draft-07/schema",
+  "$schema": "http://json-schema.org/draft-07/schema",
   "title": "Pathogenome workflow parameters",
   "description": "Parameters for downloading accession reads, assembling contigs, predicting genes, and annotating antimicrobial resistance.",
   "type": "object",
