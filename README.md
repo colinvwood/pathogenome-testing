@@ -37,12 +37,30 @@ Supply one on the launch page on Seqera.
 ## Launching on Seqera
 
 1. Open **Launchpad** in your Seqera workspace and add or select this pipeline.
-2. Choose the `v0.1.0-beta` revision.
+2. Choose the latest beta tag. To test unreleased changes from `main`, select
+   `main` and enable **Pull latest**.
 3. Select your Google Batch compute environment and Google Cloud Storage work directory.
 4. Leave **Config profile** empty and set **Pipeline schema** to **Repository default**.
 5. In **Run parameters**, select the accession TSV for **Accessions** and enter your address for **Fondue email**.
-6. Optionally adjust the Fondue and MEGAHIT thread counts.
+6. Optionally adjust the CPU/thread, memory, and time limits for each step.
+   Memory is specified in GB and time limits are specified in hours.
 7. Select **Launch**.
+
+### Default resources
+
+| Step | CPUs/threads | Memory | Time limit |
+| --- | ---: | ---: | ---: |
+| Accession import | 1 | 8 GB | 1 hour |
+| Fondue download | 8 | 16 GB | 36 hours |
+| MEGAHIT assembly | 12 | 64 GB | 48 hours |
+| Prodigal gene prediction | 12 | 32 GB | 24 hours |
+| AMRFinderPlus database download | 8 | 16 GB | 24 hours |
+| AMR annotation | 4 | 128 GB | 24 hours |
+
+Fondue, MEGAHIT, and AMRFinderPlus receive their values as application thread
+counts. For the other steps, the CPU value controls the compute resources
+requested from Seqera, although the underlying application may not use every
+allocated CPU.
 
 ## Finding the results
 

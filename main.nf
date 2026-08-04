@@ -3,12 +3,31 @@
 params.accessions = null
 params.fondue_email = null
 
+params.import_threads = 1
+params.import_memory_gb = 8
+params.import_time_hours = 1
 params.fondue_threads = 8
+params.fondue_memory_gb = 16
+params.fondue_time_hours = 36
 params.megahit_threads = 12
-
+params.megahit_memory_gb = 64
+params.megahit_time_hours = 48
+params.prodigal_threads = 12
+params.prodigal_memory_gb = 32
+params.prodigal_time_hours = 24
+params.amr_db_threads = 8
+params.amr_db_memory_gb = 16
+params.amr_db_time_hours = 24
+params.amr_threads = 4
+params.amr_memory_gb = 128
+params.amr_time_hours = 24
 
 process importAccessions {
     label 'moshpit'
+
+    cpus params.import_threads as int
+    memory "${params.import_memory_gb} GB"
+    time "${params.import_time_hours} h"
 
     input:
         path accessions_tsv
@@ -29,6 +48,8 @@ process fondueDownload {
     label 'moshpit'
 
     cpus params.fondue_threads as int
+    memory "${params.fondue_memory_gb} GB"
+    time "${params.fondue_time_hours} h"
     // q2-fondue runs fasterq-dump in /tmp. On Google Batch, specifying a
     // disk type mounts this dedicated scratch disk at /tmp.
     disk 200.GB, type: 'pd-standard'
@@ -62,6 +83,8 @@ process assembleMegahit {
     label 'moshpit'
 
     cpus params.megahit_threads as int
+    memory "${params.megahit_memory_gb} GB"
+    time "${params.megahit_time_hours} h"
     // q2-assembly and MEGAHIT keep their working data under /tmp. Google
     // local SSDs are provisioned in 375 GB units and are suited to this
     // high-I/O assembly step.
@@ -85,6 +108,10 @@ process assembleMegahit {
 
 process predictGenesProdigal {
     label 'moshpit'
+
+    cpus params.prodigal_threads as int
+    memory "${params.prodigal_memory_gb} GB"
+    time "${params.prodigal_time_hours} h"
 
     // q2-annotate unpacks the contigs artifact and writes multiple large
     // outputs under /tmp. Google local SSDs are provisioned in 375 GB units.
@@ -113,6 +140,10 @@ process predictGenesProdigal {
 process downloadAMRDB {
     label 'pathogenome'
 
+    cpus params.amr_db_threads as int
+    memory "${params.amr_db_memory_gb} GB"
+    time "${params.amr_db_time_hours} h"
+
     output:
         path "amrfinderplus-db.qza", emit: amrfinderplus_db
 
@@ -126,6 +157,10 @@ process downloadAMRDB {
 
 process AMRAnnotate {
     label 'pathogenome'
+
+    cpus params.amr_threads as int
+    memory "${params.amr_memory_gb} GB"
+    time "${params.amr_time_hours} h"
 
     input:
         path amrfinderplus_db

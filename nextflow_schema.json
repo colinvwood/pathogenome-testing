@@ -21,19 +21,131 @@
       "title": "Contact email",
       "description": "Email address supplied to q2-fondue for accession downloads."
     },
+    "import_threads": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 1,
+      "title": "Accession import CPUs",
+      "description": "Number of CPUs allocated to the accession import step."
+    },
+    "import_memory_gb": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 8,
+      "title": "Accession import memory (GB)",
+      "description": "Memory allocated to the accession import step, in GB."
+    },
+    "import_time_hours": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 1,
+      "title": "Accession import time limit (hours)",
+      "description": "Maximum runtime for the accession import step, in hours."
+    },
     "fondue_threads": {
       "type": "integer",
       "minimum": 1,
       "default": 8,
       "title": "Fondue threads",
-      "description": "Number of CPUs used to download accession reads."
+      "description": "Number of download threads and CPUs used by q2-fondue."
+    },
+    "fondue_memory_gb": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 16,
+      "title": "Fondue memory (GB)",
+      "description": "Memory allocated to the read download step, in GB."
+    },
+    "fondue_time_hours": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 36,
+      "title": "Fondue time limit (hours)",
+      "description": "Maximum runtime for the read download step, in hours."
     },
     "megahit_threads": {
       "type": "integer",
       "minimum": 1,
       "default": 12,
       "title": "MEGAHIT threads",
-      "description": "Number of CPUs used for assembly."
+      "description": "Number of assembly threads and CPUs used by MEGAHIT."
+    },
+    "megahit_memory_gb": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 64,
+      "title": "MEGAHIT memory (GB)",
+      "description": "Memory allocated to the assembly step, in GB."
+    },
+    "megahit_time_hours": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 48,
+      "title": "MEGAHIT time limit (hours)",
+      "description": "Maximum runtime for the assembly step, in hours."
+    },
+    "prodigal_threads": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 12,
+      "title": "Prodigal CPUs",
+      "description": "Number of CPUs allocated to the gene prediction step."
+    },
+    "prodigal_memory_gb": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 32,
+      "title": "Prodigal memory (GB)",
+      "description": "Memory allocated to the gene prediction step, in GB."
+    },
+    "prodigal_time_hours": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 24,
+      "title": "Prodigal time limit (hours)",
+      "description": "Maximum runtime for the gene prediction step, in hours."
+    },
+    "amr_db_threads": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 8,
+      "title": "AMRFinderPlus database CPUs",
+      "description": "Number of CPUs allocated to the AMRFinderPlus database download step."
+    },
+    "amr_db_memory_gb": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 16,
+      "title": "AMRFinderPlus database memory (GB)",
+      "description": "Memory allocated to the AMRFinderPlus database download step, in GB."
+    },
+    "amr_db_time_hours": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 24,
+      "title": "AMRFinderPlus database time limit (hours)",
+      "description": "Maximum runtime for the AMRFinderPlus database download step, in hours."
+    },
+    "amr_threads": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 4,
+      "title": "AMR annotation threads",
+      "description": "Number of threads and CPUs used by AMRFinderPlus annotation."
+    },
+    "amr_memory_gb": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 128,
+      "title": "AMR annotation memory (GB)",
+      "description": "Memory allocated to the AMRFinderPlus annotation step, in GB."
+    },
+    "amr_time_hours": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 24,
+      "title": "AMR annotation time limit (hours)",
+      "description": "Maximum runtime for the AMRFinderPlus annotation step, in hours."
     }
   }
 }
