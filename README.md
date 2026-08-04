@@ -78,4 +78,4 @@ Intermediate artifacts such as the reads downloaded with `q2-fondue`, or the con
 
 If the workflow fails, open the run in Seqera, select **Tasks**, select the failed task, and then select its **Execution log** tab.
 The execution log will contain information about the error that occurred.
-For help interpreting the error, please don't hesitate to reach out on the [QIIME 2 Forum](https://forum2.qiime2.org).
+For help interpreting the error, please don't hesitate to reach out on the [QIIME 2 Forum](https://forum.qiime2.org).
