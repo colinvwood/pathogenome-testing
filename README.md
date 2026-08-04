@@ -73,3 +73,9 @@ The QIIME 2 outputs are:
 - `amrfinderplus_proteins.qza`
 
 Intermediate artifacts such as the reads downloaded with `q2-fondue`, or the contigs from assembly can be found in the Data Explorer tabs of the corresponding tasks.
+
+## Troubleshooting a failed run
+
+If the workflow fails, open the run in Seqera, select **Tasks**, select the failed task, and then select its **Execution log** tab.
+The execution log will contain information about the error that occurred.
+For help interpreting the error, please don't hesitate to reach out on the [QIIME 2 Forum](https://forum2.qiime2.org).
